@@ -1,0 +1,7 @@
+/.direnv/
+/result
+/result-*
+/.venv/
+/work/
+/.cache/
+/*.7z

@@ -1,0 +1,17 @@
+{
+  "checksum.sha256": "7142e8744b16d2556e0cf6b3b03f01c7cb0ab7ff6e4da2ce8bb6da56b3ff2e81",
+  "checksum.sha256.sig": "05673c2a1fe04f292bfcda84aa79774ca1acac4e1f8f3c7895b10f543e842a8a",
+  "hexlicsrv94_x64linux.run": "f63d02938229723c8a0b92de1b21e423a2ead1dc3f6abd354db2d6ffae7ed906",
+  "hexlicsrv94_x64linux.run.sig": "f4fbef219863e02958437f23de76a5525a20326764387c260b41e47268eedba0",
+  "hexvault94_x64linux.run": "2a929d7a8284fdf36189d8fac473207b786b7a5b6d36c2fd160685625b545ff9",
+  "hexvault94_x64linux.run.sig": "f63d7ea4b582954f324304a68336744d4e6c851634e5554230d78d83d77d1eed",
+  "ida-pro_94_x64linux.run": "eabb64c3c849d3858759558359e9cebcf17e2a91bcc60523533df8b84462aa54",
+  "ida-pro_94_x64linux.run.sig": "68405fc57d50d17457adce007a809b40684bafc38f2fb7409f50fd7dd8c7227c",
+  "idapin94.zip": "40d7aadbe9eb7467f6aa0976d3370894171e7dba16d2c46b5a2ecfcec187a4c1",
+  "keygen.js": "cc570f24effc008a4ebd514cc3c4fbb5db05bbdeb7f420b79fdf4ed08a4611e2",
+  "keygen.js.sig": "dadd65c68dba0fdd01124ed19cd2cfd5a704e2ba949ec7dccfd879b6bd45e325",
+  "linux_patched.zip": "1cdb670140b78bb0e36b1b6e3a7fa5f89f2407e30f1b54244f6085edf0848d55",
+  "linux_patched.zip.sig": "e9cb917969cd5a5cd612f3b55fefca98bfe57d499fdb7a02b82fcd525a5f063c",
+  "lumina94_x64linux.run": "1308f24bbc432b0968e3aba01ec86c320a83e5500386e3ce9f5571eeff3887ec",
+  "lumina94_x64linux.run.sig": "ebcc9f775544e3080b10b74bd3a1dde46fb77760c895cae2a4ae3e17303a4a05"
+}
