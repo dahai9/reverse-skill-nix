@@ -54,12 +54,35 @@
         jeb = tools.jeb;
         ida-pro = tools.ida;
         ida-pro-unpatched = tools.ida.override { withPatches = false; };
+        ida-pro-mcp = tools.mcp.idapro;
+        jadx-mcp = tools.mcp.jadx;
+        jadx-mcp-plugin = tools.mcp.jadxPlugin;
+        jadx = tools.jadxPackage;
+        install-reverse-mcp = tools.mcp.install;
       };
       checks.${system} = {
+        mcp-bridges = tools.mcp.smoke;
+        jadx-mcp-plugin = tools.mcp.pluginSmoke;
         jeb-browser = tools.jeb.tests.browser;
         jeb-desktop = tools.jeb.tests.desktop;
       };
       apps.${system} = {
+        jadx = {
+          type = "app";
+          program = "${tools.jadxPackage}/bin/jadx-gui";
+        };
+        ida-pro-mcp = {
+          type = "app";
+          program = "${tools.mcp.idapro}/bin/ida-pro-mcp";
+        };
+        jadx-mcp = {
+          type = "app";
+          program = "${tools.mcp.jadx}/bin/jadx_mcp_server";
+        };
+        install-reverse-mcp = {
+          type = "app";
+          program = "${tools.mcp.install}/bin/install-reverse-mcp";
+        };
         ida = {
           type = "app";
           program = "${tools.ida}/bin/ida";

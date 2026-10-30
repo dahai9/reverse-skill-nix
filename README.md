@@ -64,13 +64,37 @@ nix develop .#web -c python3 -m playwright --version
 | 能力 | 接入方式 |
 |---|---|
 | Binary Ninja | 自备授权与安装包；本环境不捆绑 |
-| IDA/Ghidra/Burp MCP | 安装对应插件并配置客户端；主程序可用不代表 MCP 已连接 |
+| Ghidra/Burp MCP | 按需安装对应插件并配置客户端；主程序可用不代表 MCP 已连接 |
 | jshookmcp、Reqable MCP | 本环境提供 Node/npx；按实际使用的客户端单独注册，Reqable 桌面程序另装 |
 | anything-analyzer、OpenReverse、ProxyCat、PentestSwarm | 独立项目，按需固定版本、安装并配置；本环境提供 Node/pnpm、Python/uv、Go、Docker 客户端 |
 | xquik-mcp | 远程服务，单独注册并完成 OAuth |
 | PowerShell | 主要使用仓库的 Linux/Bash 入口；不为 Windows 专用脚本安装兼容环境 |
 
 `reverse-skill` 自带 Linux bootstrap 使用 apt，不适用于本项目；新增工具应修改 Nix 清单。没有自动运行该仓库的初始化、扫描或安装脚本。
+
+## Codex MCP：APK 与原生库分析
+
+提供两个固定版本的社区连接：`mrexodia/ida-pro-mcp`（commit `f82e6e2`）和 `zinja-coder/jadx-mcp-server`（commit `a8e5b7d`），JADX GUI 插件固定为 6.5.0。源码和插件下载均校验哈希。此外注册 JEB 5.38 自带的官方 HTTP MCP，不安装第三方 JEB 桥接插件。
+
+JADX 使用官方 1.5.6 JVM 发行包，由 `nix/jadx.nix` 提供 Java 17 启动器，避开 nixpkgs 包附带的可选 Quark 依赖链；不捆绑 Quark 插件能力。可用 `nix run .#jadx` 打开 GUI。
+
+JADX 插件构建时将 Javalin 的监听调用改为 `127.0.0.1`，避免其默认监听所有网卡。修改仅涉及监听地址，若上游调用结构变化，构建会失败而不会静默跳过补丁。
+
+```bash
+nix build .#ida-pro-mcp .#jadx-mcp
+nix run .#install-reverse-mcp
+codex mcp list
+```
+
+安装命令会向 `${IDAUSR:-$HOME/.idapro}/plugins/` 放置 IDA 插件链接，通过 JADX 插件管理器安装 JAR，并使用 `codex mcp add` 在 `${CODEX_HOME:-$HOME/.codex}/config.toml` 注册 `idapro`、`jadx` 和 `jeb`。已有不同的同名 IDA 插件及 Codex 配置先备份；这一步需要用户目录写权限和可用的 `codex` 命令。进入开发环境不会自动执行安装。
+
+- **JADX**：`nix develop .#android -c jadx-gui`，打开 APK 并确认 AI MCP 插件已启动。Codex 的 stdio 桥连接本机 `127.0.0.1:8650`，可以读取类、方法、Manifest、交叉引用和执行重命名。
+- **IDA**：重启 IDA 并打开要分析的原生库；插件默认提供本机 `127.0.0.1:13337` 服务，必要时在 `Edit → Plugins → MCP` 启动。Codex 通过 stdio 代理自动发现 IDA 实例。本封装只提供 GUI 插件与代理，不安装额外的 idalib Python SDK 或启动后台 supervisor。
+- **JEB**：运行 `nix run .#jeb`，在 GUI 中启动内置 MCP 或使用 VIBRE 助手入口。默认地址是 `http://localhost:8425/mcp`，仅注册地址不会代为启动服务。5.38 随包文档和 JAR 已包含此功能；[官方 MCP 文档](https://www.pnfsoftware.com/jeb/manual/mcp/) 的较新版本工具列表不代表 5.38 全部支持。
+- 安装后新开 Codex 会话加载工具。注册成功只说明配置已写入，实际分析仍要求对应 GUI 打开样本并启动插件。
+- adb、Frida 和 apktool 保持 CLI 使用；未安装 Ghidra、Burp 或设备控制类第三方 MCP。
+
+单独启动桥接程序可用 `nix run .#ida-pro-mcp -- --help` 和 `nix run .#jadx-mcp -- --help`。安装器在 `${XDG_DATA_HOME:-$HOME/.local/share}/reverse-tools/mcp/nix-roots/` 创建 GC roots，防止注册的 Nix store 路径被垃圾回收；更新包后重新运行安装命令以刷新路径。
 
 ## JEB
 
@@ -113,6 +137,8 @@ nix develop .#binary
 ```bash
 nix flake check --no-build
 nix build .#checks.x86_64-linux.jeb-browser --no-link
+nix build .#checks.x86_64-linux.mcp-bridges --no-link
+nix build .#checks.x86_64-linux.jadx-mcp-plugin --no-link
 nix develop .#full -c bash -c 'java -version; python3 --version; node --version; jadx --version; frida --version; r2 -v'
 nix fmt
 ```
@@ -120,5 +146,7 @@ nix fmt
 更新依赖时执行 `nix flake update`，审阅 `flake.lock` 后重新验证。`--no-build` 仅验证求值；实际进入开发环境会下载或构建工具。
 
 `jeb-browser` 回归测试在虚拟显示器中验证 GTK 主题图标解码和 SVG MIME 类型识别，再使用 JEB 自带的 SWT 创建 WebKit 浏览器并加载本地 HTML，不访问外网。仅测试进程关闭 WebKit 的嵌套沙箱，以兼容 Nix 构建沙箱；正常 `jeb` 启动器保留 WebKit 的默认沙箱设置。
+
+`mcp-bridges` 检查 IDA stdio 代理的初始化，以及 JADX 桥接程序的初始化和工具列表。`jadx-mcp-plugin` 实际启动插件 HTTP 服务并验证回环监听和健康接口。此处对 FastMCP 及其存储依赖保留导入检查，以本项目的 stdio 集成检查替代可选云服务测试套件。这些检查不启动分析 GUI，也不代表设备连接、IDA/JEB 后端或实际 APK 分析已经验证。
 
 `flake.lock` 已固定 nixpkgs 26.05。完整工具环境的实际下载与启动需要按各自使用场景验证。

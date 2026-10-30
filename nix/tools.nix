@@ -2,6 +2,8 @@
 let
   jeb = import ./jeb.nix { inherit pkgs; };
   ida = pkgs.callPackage ./ida-pro { };
+  jadxPackage = import ./jadx.nix { inherit pkgs; };
+  mcp = import ./mcp.nix { inherit pkgs jadxPackage; };
   buildToolsVersion = "35.0.0";
   androidSdk =
     (pkgs.androidenv.composeAndroidPackages {
@@ -19,6 +21,8 @@ in
     buildToolsVersion
     jeb
     ida
+    mcp
+    jadxPackage
     ;
 
   # No missing package is silently skipped: evaluation fails if coverage drifts.
@@ -50,14 +54,16 @@ in
     ];
     android = [
       jeb
+      mcp.jadx
       androidSdk
-      jadx
+      jadxPackage
       apktool
       frida-tools
       objection
     ];
     binary = [
       ida
+      mcp.idapro
       radare2
       ghidra
       gdb
